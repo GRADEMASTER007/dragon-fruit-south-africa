@@ -3,6 +3,9 @@ import { ArrowRight, Sprout, Globe2, Award, Truck, CheckCircle2 } from "lucide-r
 import { Button } from "@/components/ui/button";
 import heroImg from "@/assets/dragon-fruit-hero.jpg";
 import farmImg from "@/assets/dragon-fruit-farm.jpg";
+import sweetWhiteAsset from "@/assets/sweet-white-crystal.jpg.asset.json";
+import rubyAsset from "@/assets/ruby.jpg.asset.json";
+import blackDragonAsset from "@/assets/black-dragon-africana.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
