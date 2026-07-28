@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as QuoteRouteImport } from './routes/quote'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -28,6 +29,11 @@ const ShopRoute = ShopRouteImport.update({
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuoteRoute = QuoteRouteImport.update({
+  id: '/quote',
+  path: '/quote',
   getParentRoute: () => rootRouteImport,
 } as any)
 const McpRoute = McpRouteImport.update({
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/mcp': typeof McpRoute
+  '/quote': typeof QuoteRoute
   '/services': typeof ServicesRoute
   '/shop': typeof ShopRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/mcp': typeof McpRoute
+  '/quote': typeof QuoteRoute
   '/services': typeof ServicesRoute
   '/shop': typeof ShopRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/mcp': typeof McpRoute
+  '/quote': typeof QuoteRoute
   '/services': typeof ServicesRoute
   '/shop': typeof ShopRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/mcp'
+    | '/quote'
     | '/services'
     | '/shop'
     | '/.mcp/list-tools'
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/mcp'
+    | '/quote'
     | '/services'
     | '/shop'
     | '/.mcp/list-tools'
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/mcp'
+    | '/quote'
     | '/services'
     | '/shop'
     | '/.mcp/list-tools'
@@ -156,6 +168,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   McpRoute: typeof McpRoute
+  QuoteRoute: typeof QuoteRoute
   ServicesRoute: typeof ServicesRoute
   ShopRoute: typeof ShopRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -177,6 +190,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quote': {
+      id: '/quote'
+      path: '/quote'
+      fullPath: '/quote'
+      preLoaderRoute: typeof QuoteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mcp': {
@@ -244,6 +264,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   McpRoute: McpRoute,
+  QuoteRoute: QuoteRoute,
   ServicesRoute: ServicesRoute,
   ShopRoute: ShopRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
