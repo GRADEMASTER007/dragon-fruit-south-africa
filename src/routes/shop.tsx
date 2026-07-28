@@ -7,6 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search } from "lucide-react";
 import { toast } from "sonner";
+import sweetWhiteAsset from "@/assets/sweet-white-crystal.jpg.asset.json";
+import rubyAsset from "@/assets/ruby.jpg.asset.json";
+import blackDragonAsset from "@/assets/black-dragon-africana.jpg.asset.json";
+
+const CATEGORY_IMAGES: Record<string, string> = {
+  "Sweet White Crystal": sweetWhiteAsset.url,
+  "Ruby": rubyAsset.url,
+  "Black Dragon": blackDragonAsset.url,
+};
 
 export const Route = createFileRoute("/shop")({
   head: () => ({
