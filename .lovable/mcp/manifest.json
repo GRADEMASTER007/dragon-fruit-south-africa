@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "sdk_version": "0.25.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "dfsa-mcp",
+      "version": "0.1.0",
+      "title": "Dragon Fruit South Africa"
+    },
+    "tools": [
+      {
+        "name": "search_products",
+        "title": "Search dragon fruit products",
+        "description": "Search the DFSA product catalog (plants, cuttings, trays, cultivars, services, memberships). Matches on product name, SKU, or category. Prices in ZAR.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Free-text search — matches name, SKU, or category (e.g. 'ruby', 'FARM-500', 'cutting')."
+            },
+            "category": {
+              "type": "string",
+              "description": "Optional exact category filter, e.g. 'Ruby', 'Cuttings', 'Consultation'."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Maximum number of results to return. Default 20, max 100."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_product",
+        "title": "Get product details",
+        "description": "Fetch a single dragon fruit product by its SKU. Returns price, stock, and category.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "sku": {
+              "type": "string",
+              "description": "Exact product SKU, e.g. 'FARM-500-SW' or 'DFSA-MEM-12M-104'."
+            }
+          },
+          "required": [
+            "sku"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_categories",
+        "title": "List product categories",
+        "description": "List all DFSA product categories with the number of products in each.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "quote_order",
+        "title": "Quote a dragon fruit order",
+        "description": "Build a price quote from a list of SKUs and quantities. Returns line totals and a grand total in ZAR. Read-only — does not place an order.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string",
+                    "description": "Product SKU"
+                  },
+                  "qty": {
+                    "type": "integer",
+                    "description": "Quantity, minimum 1"
+                  }
+                },
+                "required": [
+                  "sku",
+                  "qty"
+                ],
+                "additionalProperties": false
+              },
+              "description": "Line items to price"
+            }
+          },
+          "required": [
+            "items"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
