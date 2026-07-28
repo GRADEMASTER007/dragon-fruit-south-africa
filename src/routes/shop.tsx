@@ -87,25 +87,36 @@ function Shop() {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filtered.map((p) => (
-          <div key={p.sku} className="group flex flex-col rounded-2xl border border-border bg-card p-5 shadow-card transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow">
-            <Badge variant="secondary" className="w-fit text-[10px] uppercase tracking-wider">{p.category}</Badge>
-            <h3 className="mt-3 font-display text-lg font-semibold leading-snug">{p.name}</h3>
-            <p className="mt-1 text-xs text-muted-foreground">SKU: {p.sku}</p>
-            <div className="mt-auto pt-4">
-              <div className="flex items-end justify-between">
-                <span className="font-display text-2xl font-semibold text-primary">{formatZAR(p.price)}</span>
-                <span className="text-xs text-muted-foreground">{p.stock} in stock</span>
+        {filtered.map((p) => {
+          const img = CATEGORY_IMAGES[p.category];
+          return (
+          <div key={p.sku} className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow">
+            {img ? (
+              <div className="aspect-[4/3] overflow-hidden">
+                <img src={img} alt={p.name} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
               </div>
-              <Button
-                onClick={() => handleAdd(p)}
-                className="mt-4 w-full bg-gradient-fruit text-white shadow-sm hover:opacity-95"
-              >
-                <Plus className="mr-1 h-4 w-4" /> Add to Cart
-              </Button>
+            ) : (
+              <div className="aspect-[4/3] bg-gradient-fruit opacity-90" />
+            )}
+            <div className="flex flex-1 flex-col p-5">
+              <Badge variant="secondary" className="w-fit text-[10px] uppercase tracking-wider">{p.category}</Badge>
+              <h3 className="mt-3 font-display text-lg font-semibold leading-snug">{p.name}</h3>
+              <p className="mt-1 text-xs text-muted-foreground">SKU: {p.sku}</p>
+              <div className="mt-auto pt-4">
+                <div className="flex items-end justify-between">
+                  <span className="font-display text-2xl font-semibold text-primary">{formatZAR(p.price)}</span>
+                  <span className="text-xs text-muted-foreground">{p.stock} in stock</span>
+                </div>
+                <Button
+                  onClick={() => handleAdd(p)}
+                  className="mt-4 w-full bg-gradient-fruit text-white shadow-sm hover:opacity-95"
+                >
+                  <Plus className="mr-1 h-4 w-4" /> Add to Cart
+                </Button>
+              </div>
             </div>
           </div>
-        ))}
+        );})}
       </div>
 
       {filtered.length === 0 && (
