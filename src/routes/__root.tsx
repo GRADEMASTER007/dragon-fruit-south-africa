@@ -82,6 +82,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         children: `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-MVRRCZ6NFZ');`,
       },
+      {
+        children: `(function(){var h=(typeof location!=='undefined'?location.hostname:'');var id=null;if(h.indexOf('wonderfuldragonfruit.company')!==-1){id='GTM-TDPC8JSV';}else if(h.indexOf('lovable.app')!==-1){id='GTM-TQJXS82R';}if(!id)return;window.dataLayer=window.dataLayer||[];window.dataLayer.push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=document.getElementsByTagName('script')[0],j=document.createElement('script');j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+id;f.parentNode.insertBefore(j,f);var n=document.createElement('noscript');var i=document.createElement('iframe');i.src='https://www.googletagmanager.com/ns.html?id='+id;i.height='0';i.width='0';i.style.display='none';i.style.visibility='hidden';n.appendChild(i);if(document.body){document.body.insertBefore(n,document.body.firstChild);}})();`,
+      },
     ],
   }),
   shellComponent: RootShell,
