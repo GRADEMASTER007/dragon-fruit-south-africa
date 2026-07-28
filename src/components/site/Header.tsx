@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingCart, Menu, X } from "lucide-react";
+import { ShoppingCart, Menu, X, FileText } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 const links = [
   { to: "/", label: "Home" },
   { to: "/shop", label: "Shop" },
+  { to: "/quote", label: "Request Quote" },
   { to: "/services", label: "Services" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
@@ -42,6 +43,16 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <Button
+            asChild
+            size="sm"
+            variant="outline"
+            className="hidden border-primary/40 text-primary hover:bg-primary/5 sm:inline-flex"
+          >
+            <Link to="/quote">
+              <FileText className="mr-1.5 h-4 w-4" /> Request Quote
+            </Link>
+          </Button>
           <Button
             variant="ghost"
             size="icon"
