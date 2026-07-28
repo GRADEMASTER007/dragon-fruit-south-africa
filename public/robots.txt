@@ -12,3 +12,6 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://wonderfuldragonfruit.company/sitemap.xml
+Sitemap: https://dragon-fruit-south-africa.lovable.app/sitemap.xml
