@@ -105,12 +105,14 @@ function Home() {
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {[
-              { name: "SWEET-WHITE-CRYSTAL™", tag: "Signature White", desc: "Sweet, aromatic white flesh. High-yield commercial cultivar." },
-              { name: "RUBY™", tag: "Deep Red", desc: "Vibrant ruby flesh with excellent shelf life and rich flavour." },
-              { name: "Black Dragon Africana Hybrid", tag: "Rare Premium", desc: "Africa-adapted rare variety with exceptional Brix." },
+              { name: "SWEET-WHITE-CRYSTAL™", tag: "Signature White", desc: "Sweet, aromatic white flesh. High-yield commercial cultivar.", img: sweetWhiteAsset.url },
+              { name: "RUBY™", tag: "Deep Red", desc: "Vibrant ruby flesh with excellent shelf life and rich flavour.", img: rubyAsset.url },
+              { name: "Black Dragon Africana Hybrid", tag: "Rare Premium", desc: "Africa-adapted rare variety with exceptional Brix.", img: blackDragonAsset.url },
             ].map((v) => (
               <div key={v.name} className="group overflow-hidden rounded-2xl border border-border bg-card shadow-card transition hover:-translate-y-1 hover:shadow-glow">
-                <div className="aspect-[4/3] bg-gradient-fruit" />
+                <div className="aspect-[4/3] overflow-hidden">
+                  <img src={v.img} alt={v.name} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                </div>
                 <div className="p-6">
                   <span className="text-xs font-semibold uppercase tracking-wider text-primary">{v.tag}</span>
                   <h3 className="mt-1 font-display text-xl font-semibold">{v.name}</h3>
