@@ -15,6 +15,7 @@ import { CartProvider } from "@/lib/cart";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { CartDrawer } from "@/components/site/CartDrawer";
+import { CookieConsent } from "@/components/site/CookieConsent";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -116,6 +117,7 @@ function RootComponent() {
           <Footer />
         </div>
         <CartDrawer />
+        <CookieConsent />
         <Toaster position="top-right" />
       </CartProvider>
     </QueryClientProvider>
