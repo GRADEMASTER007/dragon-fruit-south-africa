@@ -14,6 +14,12 @@ const ENTRIES: SitemapEntry[] = [
   { path: "/quote", changefreq: "monthly", priority: "0.8" },
   { path: "/about", changefreq: "monthly", priority: "0.6" },
   { path: "/contact", changefreq: "monthly", priority: "0.6" },
+  { path: "/privacy-policy", changefreq: "yearly", priority: "0.3" },
+  { path: "/terms-of-service", changefreq: "yearly", priority: "0.3" },
+  { path: "/cookie-policy", changefreq: "yearly", priority: "0.3" },
+  { path: "/community-guidelines", changefreq: "yearly", priority: "0.3" },
+  { path: "/copyright-policy", changefreq: "yearly", priority: "0.3" },
+  { path: "/facebook-data-deletion", changefreq: "yearly", priority: "0.3" },
 ];
 
 export const Route = createFileRoute("/sitemap.xml")({
