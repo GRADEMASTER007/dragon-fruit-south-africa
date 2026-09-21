@@ -15,6 +15,7 @@ export const Route = createFileRoute("/contact")({
       { name: "description", content: "Get in touch with DFSA. Email admin@proagrisa.co.za or call +27 83 447 4639." },
       { property: "og:title", content: "Contact DFSA" },
       { property: "og:description", content: "Reach the DFSA team for orders, consultation and export enquiries." },
+      { property: "og:type", content: "website" },
     ],
   }),
   component: Contact,
@@ -62,7 +63,9 @@ function Contact() {
           <div><Label>Name</Label><Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
           <div><Label>Email</Label><Input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
           <div><Label>Message</Label><Textarea required rows={5} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} /></div>
-          <Button className="w-full bg-gradient-fruit text-white shadow-glow hover:opacity-95">Send Message</Button>
+          <Button disabled={sending} className="w-full bg-gradient-fruit text-white shadow-glow hover:opacity-95">
+            {sending ? "Sending…" : "Send Message"}
+          </Button>
         </form>
       </div>
     </div>
