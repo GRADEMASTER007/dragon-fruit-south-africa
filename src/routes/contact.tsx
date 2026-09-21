@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/contact")({
       { name: "description", content: "Get in touch with DFSA. Email admin@proagrisa.co.za or call +27 83 447 4639." },
       { property: "og:title", content: "Contact DFSA" },
       { property: "og:description", content: "Reach the DFSA team for orders, consultation and export enquiries." },
+      { property: "og:type", content: "website" },
     ],
   }),
   component: Contact,
@@ -21,8 +23,20 @@ export const Route = createFileRoute("/contact")({
 
 function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const submit = (e: React.FormEvent) => {
+  const [sending, setSending] = useState(false);
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSending(true);
+    const { error } = await supabase.from("contact_messages").insert({
+      name: form.name,
+      email: form.email,
+      message: form.message,
+    });
+    setSending(false);
+    if (error) {
+      toast.error("Sorry — we couldn't send your message. Please email us directly.");
+      return;
+    }
     toast.success("Message sent — we'll be in touch soon.");
     setForm({ name: "", email: "", message: "" });
   };
@@ -49,7 +63,9 @@ function Contact() {
           <div><Label>Name</Label><Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
           <div><Label>Email</Label><Input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
           <div><Label>Message</Label><Textarea required rows={5} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} /></div>
-          <Button className="w-full bg-gradient-fruit text-white shadow-glow hover:opacity-95">Send Message</Button>
+          <Button disabled={sending} className="w-full bg-gradient-fruit text-white shadow-glow hover:opacity-95">
+            {sending ? "Sending…" : "Send Message"}
+          </Button>
         </form>
       </div>
     </div>

@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { formatZAR } from "@/lib/products";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,28 +30,112 @@ const SHIPPING: Record<string, { label: string; price: number; desc: string }> =
   export: { label: "Worldwide Export Quote", price: 0, desc: "We'll email you a shipping quote for cross-border orders." },
 };
 
+const PAYPAL_CLIENT_ID =
+  (import.meta.env.VITE_PAYPAL_CLIENT_ID as string) || "sb";
+
+type CartLine = { sku: string; name: string; price: number; qty: number };
+
 function Checkout() {
   const { items, subtotal, clear } = useCart();
   const [shipping, setShipping] = useState("pudo_locker");
   const [method, setMethod] = useState<"yoco" | "paypal">("yoco");
   const [form, setForm] = useState({ name: "", email: "", phone: "", address: "", city: "", country: "South Africa", notes: "" });
   const [placed, setPlaced] = useState<string | null>(null);
+  const [placedEmail, setPlacedEmail] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [paypalReady, setPaypalReady] = useState(false);
+  const paypalRef = useRef<HTMLDivElement>(null);
 
   const shippingCost = SHIPPING[shipping].price;
   const total = subtotal + shippingCost;
 
+  // Load PayPal SDK when the PayPal method is selected.
   useEffect(() => {
-    if (method === "paypal") {
-      const id = "paypal-sdk";
-      if (document.getElementById(id)) return;
-      const s = document.createElement("script");
-      s.id = id;
-      s.src = "https://www.paypal.com/sdk/js?client-id=sb&currency=USD";
-      s.async = true;
-      document.body.appendChild(s);
+    if (method !== "paypal") return;
+    const id = "paypal-sdk";
+    if (document.getElementById(id)) {
+      if ((window as any).paypal) setPaypalReady(true);
+      return;
     }
+    const s = document.createElement("script");
+    s.id = id;
+    s.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(PAYPAL_CLIENT_ID)}&currency=ZAR&intent=capture`;
+    s.async = true;
+    s.onload = () => setPaypalReady(true);
+    s.onerror = () => toast.error("Could not load PayPal. Try Yoco or refresh.");
+    document.body.appendChild(s);
   }, [method]);
+
+  // Render the real PayPal Buttons once the SDK is ready.
+  useEffect(() => {
+    if (method !== "paypal" || !paypalReady || !paypalRef.current) return;
+    const el = paypalRef.current;
+    el.innerHTML = "";
+    let cancelled = false;
+    try {
+      (window as any).paypal
+        .Buttons({
+          style: { layout: "vertical", color: "gold", shape: "rect", label: "pay" },
+          createOrder: (_data: any, actions: any) =>
+            actions.order.create({
+              purchase_units: [
+                {
+                  amount: { value: total.toFixed(2), currency_code: "ZAR" },
+                  description: `DFSA order (${items.length} items)`,
+                },
+              ],
+            }),
+          onApprove: async (_data: any, actions: any) => {
+            const details = await actions.order.capture();
+            await completeOrder("paypal", details.id || _data.orderID);
+          },
+          onError: (err: any) => {
+            console.error(err);
+            toast.error("PayPal payment failed. Please try again.");
+          },
+        })
+        .render(el);
+    } catch (e) {
+      console.error(e);
+    }
+    return () => {
+      cancelled = true;
+      if (cancelled && el) el.innerHTML = "";
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [method, paypalReady, total, items.length]);
+
+  async function completeOrder(paymentMethod: "yoco" | "paypal", paymentRef?: string) {
+    const ref = "DFSA-" + Date.now().toString(36).toUpperCase();
+    const orderLines: CartLine[] = items.map((i) => ({ sku: i.sku, name: i.name, price: i.price, qty: i.qty }));
+    const { error } = await supabase.from("orders").insert({
+      reference: ref,
+      name: form.name,
+      email: form.email,
+      phone: form.phone || null,
+      address: form.address || null,
+      city: form.city || null,
+      country: form.country,
+      notes: form.notes || null,
+      shipping_method: shipping,
+      shipping_cost: shippingCost,
+      items: orderLines,
+      subtotal,
+      total,
+      currency: "ZAR",
+      payment_method: paymentMethod,
+      payment_status: "paid",
+      payment_ref: paymentRef || null,
+    });
+    if (error) {
+      // Payment already taken — surface the reference but warn that the record failed to save.
+      console.error("order save failed", error);
+      toast.error("Payment received but we couldn't save your order. Please contact us with reference " + ref);
+    }
+    setPlacedEmail(form.email);
+    setPlaced(ref);
+    clear();
+  }
 
   const placeOrder = async () => {
     if (!form.name || !form.email || !form.phone) {
@@ -61,42 +146,39 @@ function Checkout() {
       toast.error("Your cart is empty");
       return;
     }
+    if (method === "paypal") {
+      toast.info("Use the PayPal button below to complete payment.");
+      return;
+    }
     setProcessing(true);
     try {
-      if (method === "yoco") {
-        // Yoco Popup SDK. Publishable key can safely live in the client.
-        const YOCO_PUBLIC = (import.meta.env.VITE_YOCO_PUBLIC_KEY as string) || "pk_test_ed3c54a6gOol69qa7f45";
-        await new Promise<void>((resolve, reject) => {
-          const id = "yoco-sdk";
-          const start = () => {
-            // @ts-ignore
-            const yoco = new window.YocoSDK({ publicKey: YOCO_PUBLIC });
-            yoco.showPopup({
-              amountInCents: Math.round(total * 100),
-              currency: "ZAR",
-              name: "DFSA Dragon Fruit",
-              description: `Order (${items.length} items)`,
-              callback: (result: any) => {
-                if (result.error) { toast.error(result.error.message || "Payment failed"); reject(result.error); }
-                else resolve();
-              },
-            });
-          };
-          if (document.getElementById(id)) { start(); return; }
-          const s = document.createElement("script");
-          s.id = id;
-          s.src = "https://js.yoco.com/sdk/v1/yoco-sdk-web.js";
-          s.onload = start;
-          s.onerror = () => reject(new Error("Failed to load Yoco"));
-          document.body.appendChild(s);
-        });
-      } else {
-        // PayPal — sandbox demo flow
-        await new Promise((r) => setTimeout(r, 800));
-      }
-      const ref = "DFSA-" + Date.now().toString(36).toUpperCase();
-      setPlaced(ref);
-      clear();
+      // Yoco Popup SDK. Publishable key can safely live in the client.
+      const YOCO_PUBLIC = (import.meta.env.VITE_YOCO_PUBLIC_KEY as string) || "pk_test_ed3c54a6gOol69qa7f45";
+      await new Promise<void>((resolve, reject) => {
+        const id = "yoco-sdk";
+        const start = () => {
+          // @ts-ignore
+          const yoco = new window.YocoSDK({ publicKey: YOCO_PUBLIC });
+          yoco.showPopup({
+            amountInCents: Math.round(total * 100),
+            currency: "ZAR",
+            name: "DFSA Dragon Fruit",
+            description: `Order (${items.length} items)`,
+            callback: (result: any) => {
+              if (result.error) { toast.error(result.error.message || "Payment failed"); reject(result.error); }
+              else resolve();
+            },
+          });
+        };
+        if (document.getElementById(id)) { start(); return; }
+        const s = document.createElement("script");
+        s.id = id;
+        s.src = "https://js.yoco.com/sdk/v1/yoco-sdk-web.js";
+        s.onload = start;
+        s.onerror = () => reject(new Error("Failed to load Yoco"));
+        document.body.appendChild(s);
+      });
+      await completeOrder("yoco");
     } catch (e) {
       // toast already shown
     } finally {
@@ -113,7 +195,7 @@ function Checkout() {
         <h1 className="font-display text-4xl font-semibold">Order confirmed</h1>
         <p className="mt-3 text-muted-foreground">
           Thank you! Your reference is <span className="font-mono font-semibold text-foreground">{placed}</span>.
-          We'll email you shortly at <b>{form.email || "your address"}</b> with shipping details.
+          We'll email you shortly at <b>{placedEmail || "your address"}</b> with shipping details.
         </p>
         <Button asChild className="mt-8 bg-gradient-fruit text-white"><Link to="/shop">Continue shopping</Link></Button>
       </div>
@@ -180,10 +262,16 @@ function Checkout() {
                 <RadioGroupItem value="paypal" id="paypal" />
                 <div>
                   <div className="font-semibold">PayPal</div>
-                  <div className="text-xs text-muted-foreground">International payments in USD.</div>
+                  <div className="text-xs text-muted-foreground">International card payments via PayPal.</div>
                 </div>
               </label>
             </RadioGroup>
+            {method === "paypal" && (
+              <div className="mt-5">
+                <div ref={paypalRef} className="paypal-button-container min-h-[50px]" />
+                {!paypalReady && <p className="text-xs text-muted-foreground">Loading PayPal…</p>}
+              </div>
+            )}
           </section>
         </div>
 
@@ -204,9 +292,13 @@ function Checkout() {
               <span>Total</span><span>{formatZAR(total)}</span>
             </div>
           </div>
-          <Button disabled={processing} onClick={placeOrder} size="lg" className="mt-6 w-full bg-gradient-fruit text-white shadow-glow hover:opacity-95">
-            {processing ? "Processing…" : `Pay with ${method === "yoco" ? "Yoco" : "PayPal"}`}
-          </Button>
+          {method === "yoco" ? (
+            <Button disabled={processing} onClick={placeOrder} size="lg" className="mt-6 w-full bg-gradient-fruit text-white shadow-glow hover:opacity-95">
+              {processing ? "Processing…" : "Pay with Yoco"}
+            </Button>
+          ) : (
+            <p className="mt-6 text-center text-sm text-muted-foreground">Tap the PayPal button above to pay securely.</p>
+          )}
           <p className="mt-3 text-center text-[11px] text-muted-foreground">
             Secure checkout · SSL encrypted · You'll get an email receipt.
           </p>
