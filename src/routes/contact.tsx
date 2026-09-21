@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -21,8 +22,20 @@ export const Route = createFileRoute("/contact")({
 
 function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const submit = (e: React.FormEvent) => {
+  const [sending, setSending] = useState(false);
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSending(true);
+    const { error } = await supabase.from("contact_messages").insert({
+      name: form.name,
+      email: form.email,
+      message: form.message,
+    });
+    setSending(false);
+    if (error) {
+      toast.error("Sorry — we couldn't send your message. Please email us directly.");
+      return;
+    }
     toast.success("Message sent — we'll be in touch soon.");
     setForm({ name: "", email: "", message: "" });
   };
