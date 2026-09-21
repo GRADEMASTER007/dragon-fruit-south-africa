@@ -14,6 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          address: string | null
+          city: string | null
+          country: string
+          created_at: string
+          currency: string
+          email: string
+          id: string
+          items: Json
+          name: string
+          notes: string | null
+          payment_method: string
+          payment_ref: string | null
+          payment_status: string
+          phone: string | null
+          reference: string
+          shipping_cost: number
+          shipping_method: string
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          country?: string
+          created_at?: string
+          currency?: string
+          email: string
+          id?: string
+          items?: Json
+          name: string
+          notes?: string | null
+          payment_method: string
+          payment_ref?: string | null
+          payment_status?: string
+          phone?: string | null
+          reference: string
+          shipping_cost?: number
+          shipping_method: string
+          subtotal?: number
+          total?: number
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          country?: string
+          created_at?: string
+          currency?: string
+          email?: string
+          id?: string
+          items?: Json
+          name?: string
+          notes?: string | null
+          payment_method?: string
+          payment_ref?: string | null
+          payment_status?: string
+          phone?: string | null
+          reference?: string
+          shipping_cost?: number
+          shipping_method?: string
+          subtotal?: number
+          total?: number
+        }
+        Relationships: []
+      }
       quote_requests: {
         Row: {
           address_line1: string
