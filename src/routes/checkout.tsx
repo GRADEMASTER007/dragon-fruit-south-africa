@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useCart } from "@/lib/cart";
 import { formatZAR } from "@/lib/products";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,67 +44,10 @@ function Checkout() {
   const [placed, setPlaced] = useState<string | null>(null);
   const [placedEmail, setPlacedEmail] = useState("");
   const [processing, setProcessing] = useState(false);
-  const [paypalReady, setPaypalReady] = useState(false);
-  const paypalRef = useRef<HTMLDivElement>(null);
 
   const shippingCost = SHIPPING[shipping].price;
   const total = subtotal + shippingCost;
 
-  // Load PayPal SDK when the PayPal method is selected.
-  useEffect(() => {
-    if (method !== "paypal") return;
-    const id = "paypal-sdk";
-    if (document.getElementById(id)) {
-      if ((window as any).paypal) setPaypalReady(true);
-      return;
-    }
-    const s = document.createElement("script");
-    s.id = id;
-    s.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(PAYPAL_CLIENT_ID)}&currency=ZAR&intent=capture`;
-    s.async = true;
-    s.onload = () => setPaypalReady(true);
-    s.onerror = () => toast.error("Could not load PayPal. Try Yoco or refresh.");
-    document.body.appendChild(s);
-  }, [method]);
-
-  // Render the real PayPal Buttons once the SDK is ready.
-  useEffect(() => {
-    if (method !== "paypal" || !paypalReady || !paypalRef.current) return;
-    const el = paypalRef.current;
-    el.innerHTML = "";
-    let cancelled = false;
-    try {
-      (window as any).paypal
-        .Buttons({
-          style: { layout: "vertical", color: "gold", shape: "rect", label: "pay" },
-          createOrder: (_data: any, actions: any) =>
-            actions.order.create({
-              purchase_units: [
-                {
-                  amount: { value: total.toFixed(2), currency_code: "ZAR" },
-                  description: `DFSA order (${items.length} items)`,
-                },
-              ],
-            }),
-          onApprove: async (_data: any, actions: any) => {
-            const details = await actions.order.capture();
-            await completeOrder("paypal", details.id || _data.orderID);
-          },
-          onError: (err: any) => {
-            console.error(err);
-            toast.error("PayPal payment failed. Please try again.");
-          },
-        })
-        .render(el);
-    } catch (e) {
-      console.error(e);
-    }
-    return () => {
-      cancelled = true;
-      if (cancelled && el) el.innerHTML = "";
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [method, paypalReady, total, items.length]);
 
   async function completeOrder(paymentMethod: "yoco" | "paypal", paymentRef?: string) {
     const ref = "DFSA-" + Date.now().toString(36).toUpperCase();
