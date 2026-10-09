@@ -212,8 +212,35 @@ function Checkout() {
             </RadioGroup>
             {method === "paypal" && (
               <div className="mt-5">
-                <div ref={paypalRef} className="paypal-button-container min-h-[50px]" />
-                {!paypalReady && <p className="text-xs text-muted-foreground">Loading PayPal…</p>}
+                <PayPalScriptProvider
+                  options={{
+                    clientId: PAYPAL_CLIENT_ID,
+                    currency: "ZAR",
+                    intent: "capture",
+                  }}
+                >
+                  <PayPalButtons
+                    style={{ layout: "vertical", color: "gold", shape: "rect", label: "pay" }}
+                    createOrder={(_data, actions) =>
+                      actions.order.create({
+                        purchase_units: [
+                          {
+                            amount: { value: total.toFixed(2), currency_code: "ZAR" },
+                            description: `DFSA order (${items.length} items)`,
+                          },
+                        ],
+                      })
+                    }
+                    onApprove={async (_data, actions) => {
+                      const details = await actions.order!.capture();
+                      await completeOrder("paypal", details.id || _data.orderID);
+                    }}
+                    onError={(err) => {
+                      console.error(err);
+                      toast.error("PayPal payment failed. Please try again.");
+                    }}
+                  />
+                </PayPalScriptProvider>
               </div>
             )}
           </section>
