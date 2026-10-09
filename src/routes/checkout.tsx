@@ -220,6 +220,7 @@ function Checkout() {
                   }}
                 >
                   <PayPalButtons
+                    disabled={!form.name || !form.email || !form.phone}
                     style={{ layout: "vertical", color: "gold", shape: "rect", label: "pay" }}
                     createOrder={(_data, actions) =>
                       actions.order.create({
