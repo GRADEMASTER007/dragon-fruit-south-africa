@@ -202,8 +202,8 @@ function Checkout() {
                   <div className="text-xs text-muted-foreground">Card payments (ZAR) — secure popup checkout.</div>
                 </div>
               </label>
-              <label htmlFor="paypal" className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition ${method === "paypal" ? "border-primary bg-primary/5" : "border-border"}`}>
-                <RadioGroupItem value="paypal" id="paypal" />
+              <label htmlFor="pay-paypal" className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition ${method === "paypal" ? "border-primary bg-primary/5" : "border-border"}`}>
+                <RadioGroupItem value="paypal" id="pay-paypal" />
                 <div>
                   <div className="font-semibold">PayPal</div>
                   <div className="text-xs text-muted-foreground">International card payments via PayPal.</div>
