@@ -217,6 +217,7 @@ function Checkout() {
                     clientId: PAYPAL_CLIENT_ID,
                     currency: "ZAR",
                     intent: "capture",
+                    components: ["buttons"],
                   }}
                 >
                   <PayPalButtons
