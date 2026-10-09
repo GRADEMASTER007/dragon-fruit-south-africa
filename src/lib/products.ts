@@ -140,4 +140,6 @@ export const PRODUCTS: Product[] = [
 export const CATEGORIES = Array.from(new Set(PRODUCTS.map((p) => p.category)));
 
 export const formatZAR = (n: number) =>
-  "R " + n.toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // Fixed en-US-style grouping so SSR and browser produce identical strings
+  // (Intl "en-ZA" data differs between Node and browsers → hydration mismatch).
+  "R " + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
