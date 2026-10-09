@@ -224,6 +224,7 @@ function Checkout() {
                     style={{ layout: "vertical", color: "gold", shape: "rect", label: "pay" }}
                     createOrder={(_data, actions) =>
                       actions.order.create({
+                        intent: "CAPTURE",
                         purchase_units: [
                           {
                             amount: { value: total.toFixed(2), currency_code: "ZAR" },
