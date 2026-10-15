@@ -5,11 +5,11 @@ export const Route = createFileRoute("/cookie-policy")({
   head: () => ({
     meta: [
       { title: "Cookie Policy · Dragon Fruit South Africa" },
-      { name: "description", content: "Which cookies the DFSA website uses, what they do, and how you can control or disable them in your browser." },
-      { property: "og:title", content: "Cookie Policy · Dragon Fruit South Africa" },
-      { property: "og:description", content: "Which cookies DFSA uses and how to control them." },
-      { property: "og:type", content: "article" },
-      { name: "twitter:card", content: "summary_large_image" },
+      {
+        name: "description",
+        content:
+          "How DFSA uses necessary cookies for secure sign-in and native database-backed shopping carts, and how you can control them.",
+      },
     ],
   }),
   component: CookiePolicy,
@@ -19,21 +19,52 @@ function CookiePolicy() {
   return (
     <LegalPage
       title="Cookie Policy"
-      intro="Cookies are small text files stored on your device. This page explains how Dragon Fruit South Africa uses them."
+      intro="This page describes the necessary cookies used by the Manus-hosted DFSA application."
       sections={[
         {
-          heading: "1. Types of cookies we use",
+          heading: "Necessary cookies",
           body: (
-            <ul className="list-disc space-y-1 pl-5">
-              <li><strong>Strictly necessary</strong> — keep your shopping cart and session working.</li>
-              <li><strong>Preference</strong> — remember choices such as your cookie consent.</li>
-              <li><strong>Analytics</strong> — help us understand which pages are useful (Google Analytics / Tag Manager).</li>
-            </ul>
+            <p>
+              The dfsa_guest cookie is a random identifier used to find your native-database cart
+              and notice preference; it expires after 90 days. It contains no cart contents, payment
+              keys or contact details. The webdev_app_session cookie supports verified Manus login
+              and lasts up to 30 days. A short-lived dfsa_oauth_state cookie binds sign-in to the
+              browser that started it.
+            </p>
           ),
         },
-        { heading: "2. Third-party cookies", body: <p>Analytics and payment providers may set their own cookies when their scripts load on our pages. Their use of data is governed by their own policies.</p> },
-        { heading: "3. Managing cookies", body: <p>You can block or delete cookies in your browser settings at any time. Disabling strictly necessary cookies may break the cart and checkout.</p> },
-        { heading: "4. Your consent", body: <p>By dismissing our cookie banner and continuing to use the site, you consent to the cookies described above. You can withdraw consent by clearing your browser storage.</p> },
+        {
+          heading: "Where data is stored",
+          body: (
+            <p>
+              Application business records, cart contents and notice preferences are stored in the
+              Manus-native database. Browser identifiers and signed login tokens are used to access
+              those records; browser local storage is not an alternative authoritative database.
+            </p>
+          ),
+        },
+        {
+          heading: "Analytics and payment providers",
+          body: (
+            <p>
+              This application does not load Google Analytics or Google Tag Manager. Manus platform
+              delivery may set operational cookies under its own policies. If you continue to a
+              separately hosted payment provider, that provider's necessary payment cookies and
+              privacy policy apply on its service. The app does not collect card numbers or CVVs.
+            </p>
+          ),
+        },
+        {
+          heading: "Your controls",
+          body: (
+            <p>
+              You may block or delete cookies through browser settings. Blocking necessary cookies
+              can stop cart persistence, login or access to your guest order. Acknowledging our
+              necessary-cookie notice saves only that notice preference; it does not grant consent
+              to marketing or analytics tracking.
+            </p>
+          ),
+        },
       ]}
     />
   );

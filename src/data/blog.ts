@@ -27,7 +27,8 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "how-to-start-a-dragon-fruit-farm-in-south-africa",
     title: "How to Start a Dragon Fruit Farm in South Africa",
-    excerpt: "From soil preparation to your first sale — a practical, season-by-season roadmap for new South African dragon fruit growers.",
+    excerpt:
+      "From soil preparation to your first sale — a practical, season-by-season roadmap for new South African dragon fruit growers.",
     category: "Getting Started",
     date: "2026-09-02",
     readTime: "9 min read",
@@ -80,7 +81,8 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "best-dragon-fruit-cultivars-for-commercial-growers",
     title: "The Best Dragon Fruit Cultivars for Commercial Growers",
-    excerpt: "Not all pitaya is equal. We compare white, red and rare hybrids on yield, Brix, shelf life and market demand — so you plant what sells.",
+    excerpt:
+      "Not all pitaya is equal. We compare white, red and rare hybrids on yield, Brix, shelf life and market demand — so you plant what sells.",
     category: "Cultivars",
     date: "2026-09-12",
     readTime: "8 min read",
@@ -124,7 +126,8 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "dragon-fruit-farming-economics-south-africa",
     title: "Dragon Fruit Farming Economics: What a Hectare Really Earns",
-    excerpt: "Establishment costs, yield curves and realistic revenue per hectare for South African dragon fruit — with the numbers growers actually ask us for.",
+    excerpt:
+      "Establishment costs, yield curves and realistic revenue per hectare for South African dragon fruit — with the numbers growers actually ask us for.",
     category: "Business",
     date: "2026-09-20",
     readTime: "10 min read",
@@ -175,7 +178,8 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "trellis-systems-and-plant-spacing",
     title: "Trellis Systems and Spacing: Getting the Structure Right",
-    excerpt: "Posts, cross-arms, in-row spacing and plant numbers per hectare — the structural decisions that shape every harvest for the next 15 years.",
+    excerpt:
+      "Posts, cross-arms, in-row spacing and plant numbers per hectare — the structural decisions that shape every harvest for the next 15 years.",
     category: "Growing",
     date: "2026-09-28",
     readTime: "7 min read",
@@ -224,7 +228,8 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "growing-dragon-fruit-from-cuttings",
     title: "Growing Dragon Fruit from Cuttings vs. Nursery Plants",
-    excerpt: "Seedlings, cuttings or nursery-raised plants? Here is the honest trade-off between cost, speed and fruit quality for each route.",
+    excerpt:
+      "Seedlings, cuttings or nursery-raised plants? Here is the honest trade-off between cost, speed and fruit quality for each route.",
     category: "Growing",
     date: "2026-10-04",
     readTime: "6 min read",
@@ -272,7 +277,8 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "water-irrigation-and-climate",
     title: "Water, Irrigation and Climate: How Much Is Enough?",
-    excerpt: "Dragon fruit is famously drought-hardy — but yield lives and dies on irrigation discipline. Schedules, volumes and climate limits explained.",
+    excerpt:
+      "Dragon fruit is famously drought-hardy — but yield lives and dies on irrigation discipline. Schedules, volumes and climate limits explained.",
     category: "Growing",
     date: "2026-10-09",
     readTime: "8 min read",
@@ -316,7 +322,8 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "dragon-fruit-pests-and-diseases",
     title: "Pests and Diseases: A Grower's Field Guide",
-    excerpt: "Stem canker, anthracnose, mealybug, fruit fly and sunburn — what to look for on your stems and fruit, and how to respond before it spreads.",
+    excerpt:
+      "Stem canker, anthracnose, mealybug, fruit fly and sunburn — what to look for on your stems and fruit, and how to respond before it spreads.",
     category: "Growing",
     date: "2026-10-14",
     readTime: "8 min read",
@@ -364,7 +371,8 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "harvesting-and-post-harvest-handling",
     title: "Harvesting and Post-Harvest: Protecting Every Rand",
-    excerpt: "Pick timing, field heat, grading and cold chain — where quality is won or lost between the vine and the buyer.",
+    excerpt:
+      "Pick timing, field heat, grading and cold chain — where quality is won or lost between the vine and the buyer.",
     category: "Harvest & Market",
     date: "2026-10-18",
     readTime: "7 min read",
@@ -406,7 +414,8 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "exporting-dragon-fruit-from-south-africa",
     title: "Exporting Dragon Fruit from South Africa: The Opportunity",
-    excerpt: "Sea and air freight windows, phytosanitary requirements and which markets pay — a plain-language guide to taking pitaya offshore.",
+    excerpt:
+      "Sea and air freight windows, phytosanitary requirements and which markets pay — a plain-language guide to taking pitaya offshore.",
     category: "Harvest & Market",
     date: "2026-10-22",
     readTime: "8 min read",
@@ -454,7 +463,8 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "pitaya-the-future-of-african-agriculture",
     title: "Why Dragon Fruit Could Reshape African Agriculture",
-    excerpt: "Low water, high value, marginal land, global demand — the case that pitaya is more than a niche crop for African growers.",
+    excerpt:
+      "Low water, high value, marginal land, global demand — the case that pitaya is more than a niche crop for African growers.",
     category: "Insight",
     date: "2026-10-26",
     readTime: "6 min read",

@@ -16,36 +16,81 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-2">
           <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-fruit text-lg text-white">🐉</div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-fruit text-lg text-white">
+              🐉
+            </div>
             <div>
               <div className="font-display text-lg font-semibold">DFSA</div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Dragon Fruit South Africa</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Dragon Fruit South Africa
+              </div>
             </div>
           </div>
           <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-            Leading the dragon fruit farming industry since 2008. Premium plants, expert consultation, and worldwide export.
+            Leading the dragon fruit farming industry since 2008. Premium plants, expert
+            consultation, and worldwide export.
           </p>
           <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> admin@proagrisa.co.za</li>
-            <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> +27 83 447 4639</li>
-            <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> +1 351 777 2848</li>
+            <li className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              <a href="mailto:admin@proagrisa.co.za">admin@proagrisa.co.za</a>
+            </li>
+            <li className="flex items-center gap-2">
+              <Phone className="h-4 w-4" />
+              <a href="tel:+27834474639">+27 83 447 4639</a>
+            </li>
+            <li className="flex items-center gap-2">
+              <Phone className="h-4 w-4" />
+              <a href="tel:+13517772848">+1 351 777 2848</a>
+            </li>
           </ul>
         </div>
 
         <div>
           <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider">Quick Links</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/shop" className="hover:text-primary">Shop Cultivars</Link></li>
-            <li><Link to="/quote" className="hover:text-primary">Request Quote</Link></li>
-            <li><Link to="/services" className="hover:text-primary">Book Consultation</Link></li>
-            <li><Link to="/services" className="hover:text-primary">Rooting Services</Link></li>
-            <li><Link to="/about" className="hover:text-primary">About DFSA</Link></li>
-            <li><Link to="/contact" className="hover:text-primary">Contact</Link></li>
+            <li>
+              <Link to="/shop" className="hover:text-primary">
+                Shop Cultivars
+              </Link>
+            </li>
+            <li>
+              <Link to="/quote" className="hover:text-primary">
+                Request Quote
+              </Link>
+            </li>
+            <li>
+              <Link to="/blog" className="hover:text-primary">
+                Farming Blog
+              </Link>
+            </li>
+            <li>
+              <Link to="/services" className="hover:text-primary">
+                Book Consultation
+              </Link>
+            </li>
+            <li>
+              <Link to="/services" className="hover:text-primary">
+                Rooting Services
+              </Link>
+            </li>
+            <li>
+              <Link to="/about" className="hover:text-primary">
+                About DFSA
+              </Link>
+            </li>
+            <li>
+              <Link to="/contact" className="hover:text-primary">
+                Contact
+              </Link>
+            </li>
           </ul>
         </div>
 
         <div>
-          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider">Countries We Serve</h4>
+          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider">
+            Countries We Serve
+          </h4>
           <ul className="space-y-1.5 text-sm text-muted-foreground">
             <li>🇿🇦 South Africa</li>
             <li>🇧🇼 Botswana</li>
@@ -61,7 +106,11 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             {legalLinks.map((l) => (
               <li key={l.to}>
-                <Link to={l.to} className="hover:text-primary" activeProps={{ className: "text-primary" }}>
+                <Link
+                  to={l.to}
+                  className="hover:text-primary"
+                  activeProps={{ className: "text-primary" }}
+                >
                   {l.label}
                 </Link>
               </li>
@@ -70,7 +119,8 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-border py-5 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Dragon Fruit South Africa · Since 2008 · Worldwide Commercial Plant Supply
+        © {new Date().getFullYear()} Dragon Fruit South Africa · Since 2008 · Worldwide Commercial
+        Plant Supply
       </div>
     </footer>
   );

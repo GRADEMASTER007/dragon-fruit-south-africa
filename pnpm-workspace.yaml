@@ -1,0 +1,6 @@
+allowBuilds:
+  esbuild: true
+  sharp: true
+  '@parcel/watcher': true
+  '@tailwindcss/oxide': true
+  rolldown: true

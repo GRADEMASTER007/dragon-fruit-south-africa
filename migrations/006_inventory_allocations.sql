@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS inventory_allocations (
+  id VARCHAR(36) PRIMARY KEY,
+  order_id VARCHAR(36) NOT NULL,
+  sku VARCHAR(100) NOT NULL,
+  environment VARCHAR(10) NOT NULL,
+  quantity INT NOT NULL,
+  status VARCHAR(30) NOT NULL DEFAULT 'reserved',
+  consumed_at TIMESTAMP(3),
+  created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  UNIQUE KEY inventory_allocations_order_sku_environment (order_id, sku, environment),
+  INDEX inventory_allocations_sku_environment_status (sku, environment, status),
+  INDEX inventory_allocations_order_environment_status (order_id, environment, status),
+  FOREIGN KEY (order_id) REFERENCES orders(id),
+  FOREIGN KEY (sku) REFERENCES products(sku),
+  CHECK (environment IN ('test', 'live')),
+  CHECK (quantity > 0),
+  CHECK (status IN ('reserved', 'consumed')),
+  CHECK ((status = 'reserved' AND consumed_at IS NULL) OR status = 'consumed')
+);
