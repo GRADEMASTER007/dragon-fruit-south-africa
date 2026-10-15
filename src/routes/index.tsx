@@ -47,6 +47,17 @@ function Home() {
                 <Link to="/quote"><Quote className="mr-2 h-4 w-4" /> Request a quote</Link>
               </Button>
             </div>
+            <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-xs text-home-light/75 sm:text-sm">
+              {[
+                { i: BadgeCheck, t: "Field-inspected, farm-ready stock" },
+                { i: Leaf, t: "90+ proven cultivars" },
+                { i: Globe2, t: "Exported across 4 continents" },
+              ].map(({ i: Icon, t }) => (
+                <span key={t} className="flex items-center gap-2">
+                  <Icon className="h-4 w-4 text-home-leaf" /> {t}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
         <div className="absolute bottom-5 right-5 hidden items-center gap-2 text-xs uppercase tracking-[0.15em] text-home-light/70 md:flex">
