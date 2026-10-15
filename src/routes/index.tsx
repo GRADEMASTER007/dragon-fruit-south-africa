@@ -96,8 +96,9 @@ function Home() {
               { name: "SWEET-WHITE-CRYSTAL™", tag: "Signature White", desc: "Sweet, aromatic white flesh. High-yield commercial cultivar.", img: sweetWhiteAsset.url },
               { name: "RUBY™", tag: "Deep Red", desc: "Vibrant ruby flesh with excellent shelf life and rich flavour.", img: rubyAsset.url },
               { name: "Black Dragon Africana Hybrid", tag: "Rare Premium", desc: "Africa-adapted rare variety with exceptional Brix.", img: blackDragonAsset.url },
-            ].map((v) => (
-              <article key={v.name} className="group">
+            ].map((v, idx) => (
+              <Reveal key={v.name} delay={idx * 120}>
+              <article className="group">
                 <div className="aspect-[4/5] overflow-hidden bg-muted">
                   <img src={v.img} alt={v.name} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
                 </div>
@@ -108,8 +109,64 @@ function Home() {
                   <Link to="/shop" className="mt-5 inline-flex items-center text-sm font-semibold text-home-dark transition hover:text-primary">Shop this cultivar <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </div>
               </article>
+              </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="py-20 md:py-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <Reveal>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">How it works</p>
+            <h2 className="mt-4 max-w-2xl font-display text-4xl font-semibold leading-tight text-home-dark md:text-5xl">From your first enquiry to your first harvest.</h2>
+          </Reveal>
+          <div className="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
+            {[
+              { n: "01", i: Sprout, t: "Choose your cultivars", d: "Tell us your climate, acreage and goals. We match you to the cultivars proven to thrive — from starter trays to full commercial packs." },
+              { n: "02", i: Truck, t: "We prepare & deliver", d: "Your plants are hardened off, carefully packed and shipped countrywide, or collected from the farm. Lockers and door delivery available." },
+              { n: "03", i: HeartHandshake, t: "We grow with you", d: "Trellis plans, funding manuals, business plans and ongoing agronomic support — our team stays with you to first harvest and beyond." },
+            ].map(({ n, i: Icon, t, d }, idx) => (
+              <Reveal key={n} delay={idx * 120}>
+                <div className="flex h-full flex-col border-t border-home-dark/10 pt-6">
+                  <div className="flex items-center justify-between">
+                    <span className="font-display text-5xl font-semibold text-home-dark/15">{n}</span>
+                    <Icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="mt-6 font-display text-2xl font-semibold text-home-dark">{t}</h3>
+                  <p className="mt-3 leading-relaxed text-home-muted">{d}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-home-canvas py-20 md:py-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <Reveal>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Growers' voices</p>
+            <h2 className="mt-4 font-display text-4xl font-semibold leading-tight text-home-dark md:text-5xl">Trusted on farms across the region.</h2>
+          </Reveal>
+          <div className="mt-14 grid gap-8 md:grid-cols-3">
+            {[
+              { q: "The planting material arrived vigorous and true to type. First fruit set within fourteen months — exactly as they said it would.", who: "Commercial grower", loc: "Limpopo" },
+              { q: "Their funding manual and business plan got our application approved. Support didn't stop at delivery — they answer the phone.", who: "Small-scale farmer", loc: "Eastern Cape" },
+              { q: "Rare cultivars I couldn't find anywhere else, rooted and ready. My subs are selling out at the market every week.", who: "Nursery owner", loc: "Western Cape" },
+            ].map(({ q, who, loc }, idx) => (
+              <Reveal key={who} delay={idx * 120}>
+                <figure className="flex h-full flex-col border border-home-dark/10 bg-background p-8">
+                  <Quote className="h-7 w-7 text-primary" />
+                  <blockquote className="mt-5 flex-1 leading-relaxed text-home-dark/85">"{q}"</blockquote>
+                  <figcaption className="mt-6 border-t border-home-dark/10 pt-4 text-sm">
+                    <span className="font-semibold text-home-dark">{who}</span>
+                    <span className="ml-2 inline-flex items-center gap-1 text-home-muted"><MapPin className="h-3.5 w-3.5" />{loc}</span>
+                  </figcaption>
+                </figure>
+              </Reveal>
+            ))}
+          </div>
+          <p className="mt-8 text-sm text-home-muted">Grower accounts are illustrative of the service we provide. Share your story with us and it could feature here.</p>
         </div>
       </section>
 
