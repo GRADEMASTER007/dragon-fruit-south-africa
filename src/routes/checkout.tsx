@@ -1,283 +1,256 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { formatZAR } from "@/lib/products";
-import { supabase } from "@/integrations/supabase/client";
+import { storeApi } from "@/lib/store-api";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, Package, Truck } from "lucide-react";
+import { Package, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
+type GatewayOption = { gateway: string; mode: string; label: string };
+type Order = {
+  reference: string;
+  status: string;
+  totalCents: number;
+  paidCents: number;
+  outstandingCents: number;
+  environment: string;
+  currency: string;
+};
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
       { title: "Checkout · DFSA Dragon Fruit" },
-      { name: "description", content: "Secure checkout with Yoco and PayPal. PUDO shipping available." },
-      { property: "og:title", content: "Checkout · DFSA" },
-      { property: "og:description", content: "Pay securely with Yoco or PayPal." },
+      {
+        name: "description",
+        content:
+          "Review your dragon fruit plant selection and request a delivery quotation from DFSA.",
+      },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: Checkout,
 });
 
-const SHIPPING: Record<string, { label: string; price: number; desc: string }> = {
-  pudo_locker: { label: "PUDO Locker-to-Locker", price: 60, desc: "Drop off & collect at any PUDO locker in South Africa." },
-  pudo_door: { label: "PUDO Door-to-Door", price: 150, desc: "Door delivery via PUDO courier network." },
-  pickup: { label: "Farm Pickup", price: 0, desc: "Collect from our farm — you'll receive an address by email." },
-  export: { label: "Worldwide Export Quote", price: 0, desc: "We'll email you a shipping quote for cross-border orders." },
-};
-
-const PAYPAL_CLIENT_ID =
-  (import.meta.env.VITE_PAYPAL_CLIENT_ID as string) || "sb";
-
-type CartLine = { sku: string; name: string; price: number; qty: number };
-
 function Checkout() {
-  const { items, subtotal, clear } = useCart();
-  const [shipping, setShipping] = useState("pudo_locker");
-  const [method, setMethod] = useState<"yoco" | "paypal">("yoco");
-  const [form, setForm] = useState({ name: "", email: "", phone: "", address: "", city: "", country: "South Africa", notes: "" });
-  const [placed, setPlaced] = useState<string | null>(null);
-  const [placedEmail, setPlacedEmail] = useState("");
-  const [processing, setProcessing] = useState(false);
-
-  const shippingCost = SHIPPING[shipping].price;
-  const total = subtotal + shippingCost;
-
-
-  async function completeOrder(paymentMethod: "yoco" | "paypal", paymentRef?: string) {
-    const ref = "DFSA-" + Date.now().toString(36).toUpperCase();
-    const orderLines: CartLine[] = items.map((i) => ({ sku: i.sku, name: i.name, price: i.price, qty: i.qty }));
-    const { error } = await supabase.from("orders").insert({
-      reference: ref,
-      name: form.name,
-      email: form.email,
-      phone: form.phone || null,
-      address: form.address || null,
-      city: form.city || null,
-      country: form.country,
-      notes: form.notes || null,
-      shipping_method: shipping,
-      shipping_cost: shippingCost,
-      items: orderLines,
-      subtotal,
-      total,
-      currency: "ZAR",
-      payment_method: paymentMethod,
-      payment_status: "paid",
-      payment_ref: paymentRef || null,
-    });
-    if (error) {
-      // Payment already taken — surface the reference but warn that the record failed to save.
-      console.error("order save failed", error);
-      toast.error("Payment received but we couldn't save your order. Please contact us with reference " + ref);
-    }
-    setPlacedEmail(form.email);
-    setPlaced(ref);
-    clear();
-  }
-
-  const placeOrder = async () => {
-    if (!form.name || !form.email || !form.phone) {
-      toast.error("Please fill in your name, email and phone");
-      return;
-    }
-    if (items.length === 0) {
-      toast.error("Your cart is empty");
-      return;
-    }
-    if (method === "paypal") {
-      toast.info("Use the PayPal button below to complete payment.");
-      return;
-    }
-    setProcessing(true);
+  const { items, subtotal, loading } = useCart();
+  const [gateways, setGateways] = useState<GatewayOption[]>([]);
+  const [gateway, setGateway] = useState("");
+  const [form, setForm] = useState({ name: "", email: "", phone: "", notes: "" });
+  const [busy, setBusy] = useState(false);
+  const [order, setOrder] = useState<Order | null>(null);
+  const [orderError, setOrderError] = useState("");
+  const key = useRef("");
+  const payloadKey = useRef("");
+  async function refreshOrder() {
+    const orderId = new URLSearchParams(window.location.search).get("order");
+    if (!orderId) return;
     try {
-      // Yoco Popup SDK. Publishable key can safely live in the client.
-      const YOCO_PUBLIC = (import.meta.env.VITE_YOCO_PUBLIC_KEY as string) || "pk_test_ed3c54a6gOol69qa7f45";
-      await new Promise<void>((resolve, reject) => {
-        const id = "yoco-sdk";
-        const start = () => {
-          // @ts-ignore
-          const yoco = new window.YocoSDK({ publicKey: YOCO_PUBLIC });
-          yoco.showPopup({
-            amountInCents: Math.round(total * 100),
-            currency: "ZAR",
-            name: "DFSA Dragon Fruit",
-            description: `Order (${items.length} items)`,
-            callback: (result: any) => {
-              if (result.error) { toast.error(result.error.message || "Payment failed"); reject(result.error); }
-              else resolve();
-            },
-          });
-        };
-        if (document.getElementById(id)) { start(); return; }
-        const s = document.createElement("script");
-        s.id = id;
-        s.src = "https://js.yoco.com/sdk/v1/yoco-sdk-web.js";
-        s.onload = start;
-        s.onerror = () => reject(new Error("Failed to load Yoco"));
-        document.body.appendChild(s);
-      });
-      await completeOrder("yoco");
-    } catch (e) {
-      // toast already shown
-    } finally {
-      setProcessing(false);
+      const result = await storeApi<{ order: Order }>(`/api/orders/${encodeURIComponent(orderId)}`);
+      setOrder(result.order);
+      setOrderError("");
+    } catch (error) {
+      setOrderError(error instanceof Error ? error.message : "Order status is unavailable.");
     }
-  };
-
-  if (placed) {
+  }
+  useEffect(() => {
+    void storeApi<{ gateways: GatewayOption[] }>("/api/payment-options")
+      .then((result) => {
+        setGateways(result.gateways);
+        setGateway(result.gateways[0]?.gateway || "");
+      })
+      .catch(() => setGateways([]));
+    void refreshOrder();
+  }, []);
+  async function pay() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const payload = {
+        ...form,
+        gateway,
+        country: "South Africa",
+        shipping_method: "pickup",
+        origin: window.location.origin,
+        items: items.map((item) => ({ sku: item.sku, qty: item.qty })),
+      };
+      const fingerprint = JSON.stringify(payload);
+      if (payloadKey.current !== fingerprint) {
+        payloadKey.current = fingerprint;
+        key.current = crypto.randomUUID();
+      }
+      const result = await storeApi<{
+        orderId: string;
+        reference: string;
+        checkout?: { url?: string; form?: { action: string; fields: [string, string][] } };
+      }>("/api/checkout", { ...payload, idempotencyKey: key.current });
+      toast.info("Opening the payment provider's sandbox. A return page never confirms payment.");
+      if (result.checkout?.url) window.location.assign(result.checkout.url);
+      else if (result.checkout?.form) {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = result.checkout.form.action;
+        for (const [name, value] of result.checkout.form.fields) {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = name;
+          input.value = value;
+          form.appendChild(input);
+        }
+        document.body.appendChild(form);
+        form.submit();
+      } else {
+        window.history.replaceState(null, "", `/checkout?order=${result.orderId}`);
+        await refreshOrder();
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Checkout could not be created; no payment is confirmed.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+  if (loading)
     return (
-      <div className="mx-auto max-w-2xl px-4 py-24 text-center sm:px-6">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-accent/15 text-accent">
-          <CheckCircle2 className="h-8 w-8" />
-        </div>
-        <h1 className="font-display text-4xl font-semibold">Order confirmed</h1>
-        <p className="mt-3 text-muted-foreground">
-          Thank you! Your reference is <span className="font-mono font-semibold text-foreground">{placed}</span>.
-          We'll email you shortly at <b>{placedEmail || "your address"}</b> with shipping details.
-        </p>
-        <Button asChild className="mt-8 bg-gradient-fruit text-white"><Link to="/shop">Continue shopping</Link></Button>
+      <div className="mx-auto max-w-3xl px-4 py-20" role="status">
+        Loading your saved cart…
       </div>
     );
-  }
-
-  if (items.length === 0) {
+  if (!items.length && !order && !orderError)
     return (
-      <div className="mx-auto max-w-xl px-4 py-24 text-center sm:px-6">
-        <Package className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-        <h1 className="mt-4 font-display text-3xl font-semibold">Your cart is empty</h1>
-        <Button asChild className="mt-6 bg-gradient-fruit text-white"><Link to="/shop">Browse plants</Link></Button>
+      <div className="mx-auto max-w-xl px-4 py-24 text-center">
+        <Package className="mx-auto h-12 w-12 text-muted-foreground" />
+        <h1 className="mt-4 font-display text-3xl">Your cart is empty</h1>
+        <Button asChild className="mt-6">
+          <Link to="/shop">Browse plants</Link>
+        </Button>
       </div>
     );
-  }
-
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <h1 className="mb-8 font-display text-4xl font-semibold">Checkout</h1>
-      <div className="grid gap-10 lg:grid-cols-[1fr_400px]">
-        <div className="space-y-8">
-          <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
-            <h2 className="mb-4 font-display text-xl font-semibold">Contact & Delivery</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2"><Label>Full Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-              <div><Label>Email *</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
-              <div><Label>Phone *</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
-              <div className="sm:col-span-2"><Label>Address</Label><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
-              <div><Label>City</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
-              <div><Label>Country</Label><Input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} /></div>
-              <div className="sm:col-span-2"><Label>Order notes</Label><Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></div>
-            </div>
-          </section>
-
-          <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
-            <h2 className="mb-4 flex items-center gap-2 font-display text-xl font-semibold"><Truck className="h-5 w-5" /> Shipping</h2>
-            <RadioGroup value={shipping} onValueChange={setShipping} className="space-y-2">
-              {Object.entries(SHIPPING).map(([k, v]) => (
-                <label key={k} htmlFor={k} className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 transition ${shipping === k ? "border-primary bg-primary/5" : "border-border"}`}>
-                  <div className="flex items-start gap-3">
-                    <RadioGroupItem value={k} id={k} className="mt-1" />
-                    <div>
-                      <div className="font-medium">{v.label}</div>
-                      <div className="text-xs text-muted-foreground">{v.desc}</div>
-                    </div>
-                  </div>
-                  <div className="font-semibold">{v.price === 0 ? "Free / Quote" : formatZAR(v.price)}</div>
-                </label>
-              ))}
-            </RadioGroup>
-          </section>
-
-          <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
-            <h2 className="mb-4 font-display text-xl font-semibold">Payment</h2>
-            <RadioGroup value={method} onValueChange={(v) => setMethod(v as any)} className="grid gap-3 sm:grid-cols-2">
-              <label htmlFor="yoco" className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition ${method === "yoco" ? "border-primary bg-primary/5" : "border-border"}`}>
-                <RadioGroupItem value="yoco" id="yoco" />
-                <div>
-                  <div className="font-semibold">Yoco</div>
-                  <div className="text-xs text-muted-foreground">Card payments (ZAR) — secure popup checkout.</div>
-                </div>
-              </label>
-              <label htmlFor="pay-paypal" className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition ${method === "paypal" ? "border-primary bg-primary/5" : "border-border"}`}>
-                <RadioGroupItem value="paypal" id="pay-paypal" />
-                <div>
-                  <div className="font-semibold">PayPal</div>
-                  <div className="text-xs text-muted-foreground">International card payments via PayPal.</div>
-                </div>
-              </label>
-            </RadioGroup>
-            {method === "paypal" && (
-              <div className="mt-5">
-                <PayPalScriptProvider
-                  options={{
-                    clientId: PAYPAL_CLIENT_ID,
-                    currency: "ZAR",
-                    intent: "capture",
-                    components: ["buttons"],
-                  }}
-                >
-                  <PayPalButtons
-                    disabled={!form.name || !form.email || !form.phone}
-                    style={{ layout: "vertical", color: "gold", shape: "rect", label: "pay" }}
-                    createOrder={(_data, actions) =>
-                      actions.order.create({
-                        intent: "CAPTURE",
-                        purchase_units: [
-                          {
-                            amount: { value: total.toFixed(2), currency_code: "ZAR" },
-                            description: `DFSA order (${items.length} items)`,
-                          },
-                        ],
-                      })
-                    }
-                    onApprove={async (_data, actions) => {
-                      const details = await actions.order!.capture();
-                      await completeOrder("paypal", details.id || _data.orderID);
-                    }}
-                    onError={(err) => {
-                      console.error(err);
-                      toast.error("PayPal payment failed. Please try again.");
-                    }}
-                  />
-                </PayPalScriptProvider>
-              </div>
-            )}
-          </section>
-        </div>
-
-        <aside className="h-fit rounded-2xl border border-border bg-card p-6 shadow-card lg:sticky lg:top-24">
-          <h2 className="mb-4 font-display text-xl font-semibold">Order Summary</h2>
-          <ul className="max-h-64 space-y-2 overflow-y-auto text-sm">
-            {items.map((i) => (
-              <li key={i.sku} className="flex justify-between gap-3">
-                <span className="flex-1">{i.name} <span className="text-muted-foreground">× {i.qty}</span></span>
-                <span className="font-medium">{formatZAR(i.price * i.qty)}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-4 space-y-2 border-t pt-4 text-sm">
-            <div className="flex justify-between"><span>Subtotal</span><span>{formatZAR(subtotal)}</span></div>
-            <div className="flex justify-between"><span>Shipping</span><span>{shippingCost === 0 ? "—" : formatZAR(shippingCost)}</span></div>
-            <div className="flex justify-between border-t pt-2 font-display text-xl font-semibold text-primary">
-              <span>Total</span><span>{formatZAR(total)}</span>
-            </div>
-          </div>
-          {method === "yoco" ? (
-            <Button disabled={processing} onClick={placeOrder} size="lg" className="mt-6 w-full bg-gradient-fruit text-white shadow-glow hover:opacity-95">
-              {processing ? "Processing…" : "Pay with Yoco"}
-            </Button>
-          ) : (
-            <p className="mt-6 text-center text-sm text-muted-foreground">Tap the PayPal button above to pay securely.</p>
+    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+      <p className="text-sm font-medium uppercase tracking-wider text-primary">Your selection</p>
+      <h1 className="mt-2 font-display text-4xl font-semibold">Review your order</h1>
+      {(order || orderError) && (
+        <section className="mt-6 rounded-xl border border-primary/30 p-5">
+          <h2 className="font-display text-xl">Payment status</h2>
+          {order && (
+            <>
+              <p className="mt-3">
+                {order.reference} · {order.environment} · {order.status.replaceAll("_", " ")}
+              </p>
+              <p className="mt-2 text-sm">
+                Verified paid: {formatZAR(order.paidCents / 100)} · Outstanding:{" "}
+                {formatZAR(order.outstandingCents / 100)}
+              </p>
+              <p className="mt-3 text-xs text-muted-foreground">
+                Only verified server events change this status. A success, approval, cancel or
+                failure URL does not change your payment record.
+              </p>
+            </>
           )}
-          <p className="mt-3 text-center text-[11px] text-muted-foreground">
-            Secure checkout · SSL encrypted · You'll get an email receipt.
-          </p>
-        </aside>
+          {orderError && <p role="alert">{orderError}</p>}
+          <Button variant="outline" onClick={() => void refreshOrder()} className="mt-4">
+            Refresh verified status
+          </Button>
+        </section>
+      )}
+      <div className="mt-8 rounded-2xl border border-border bg-card p-6">
+        <ul className="divide-y divide-border">
+          {items.map((item) => (
+            <li key={item.sku} className="flex justify-between gap-4 py-4">
+              <div>
+                <p className="font-medium">{item.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  {item.sku} · Quantity {item.qty}
+                </p>
+              </div>
+              <p className="whitespace-nowrap">{formatZAR(item.price * item.qty)}</p>
+            </li>
+          ))}
+        </ul>
+        <div className="flex justify-between border-t pt-5 font-semibold">
+          <span>Estimated subtotal</span>
+          <span>{formatZAR(subtotal)}</span>
+        </div>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Stock and prices are rechecked by the server. PUDO locker/door deliveries, export,
+          commercial packaging, digital delivery and service scheduling need a manual quotation.
+          Sandbox checkout currently supports local farm collection only.
+        </p>
       </div>
+      <section className="mt-6 rounded-2xl border border-primary/20 bg-primary/5 p-6">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-5 w-5 text-primary" />
+          <h2 className="font-display text-xl">
+            {gateways.length
+              ? "Sandbox checkout — not live payments"
+              : "Online payments are not available yet"}
+          </h2>
+        </div>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+          {gateways.length
+            ? "This test flow uses server-created orders and hosted checkout. No real-money live gateway is enabled. Test and live records are kept separate."
+            : "Payment gateways must be configured and verified before this site can accept payment. No payment has been taken and no order is marked as paid. You can send a quotation request to the DFSA team instead."}
+        </p>
+        {gateways.length > 0 && (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              void pay();
+            }}
+            className="mt-5 space-y-4"
+          >
+            {(["name", "email", "phone"] as const).map((name) => (
+              <label key={name} className="block text-sm capitalize">
+                {name}
+                <input
+                  required
+                  maxLength={name === "email" ? 320 : name === "name" ? 200 : 60}
+                  type={name === "email" ? "email" : name === "phone" ? "tel" : "text"}
+                  value={form[name]}
+                  onChange={(event) => setForm({ ...form, [name]: event.target.value })}
+                  className="mt-1 w-full rounded border border-input bg-background p-2"
+                />
+              </label>
+            ))}
+            <label className="block text-sm">
+              Test gateway
+              <select
+                value={gateway}
+                onChange={(event) => setGateway(event.target.value)}
+                className="mt-1 w-full rounded border border-input bg-background p-2"
+              >
+                {gateways.map((option) => (
+                  <option key={option.gateway} value={option.gateway}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <p className="text-xs">
+              Shipping: Farm collection by arrangement. Availability is rechecked, not reserved
+              until payment; a captured payment with insufficient stock is held for manual
+              fulfilment review.
+            </p>
+            <Button disabled={busy || !items.length} type="submit">
+              {busy
+                ? "Creating secure test order…"
+                : `Continue to ${gateway.toUpperCase()} sandbox`}
+            </Button>
+          </form>
+        )}
+        <Button asChild className="mt-5">
+          <Link to="/quote" search={{ fromCart: true }}>
+            Request a quotation
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="ml-3 mt-5">
+          <Link to="/shop">Continue browsing</Link>
+        </Button>
+      </section>
     </div>
   );
 }

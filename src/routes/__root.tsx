@@ -8,16 +8,22 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
+import "@fontsource/ibm-plex-sans/400.css";
+import "@fontsource/ibm-plex-sans/500.css";
+import "@fontsource/ibm-plex-sans/600.css";
+import "@fontsource/libre-baskerville/400.css";
+import "@fontsource/libre-baskerville/700.css";
+import "@fontsource/libre-baskerville/400-italic.css";
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "@/lib/cart";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { CartDrawer } from "@/components/site/CartDrawer";
 import { CookieConsent } from "@/components/site/CookieConsent";
 import { Toaster } from "@/components/ui/sonner";
+import { getSiteSeo } from "@/lib/seo";
 
 function NotFoundComponent() {
   return (
@@ -28,7 +34,10 @@ function NotFoundComponent() {
         <p className="mt-2 text-sm text-muted-foreground">
           The page you're looking for doesn't exist.
         </p>
-        <Link to="/" className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
+        <Link
+          to="/"
+          className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        >
           Go home
         </Link>
       </div>
@@ -40,9 +49,6 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   const err = error instanceof Error ? error : new Error(String(error));
   console.error(err);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -50,7 +56,10 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
         <h1 className="text-xl font-semibold">This page didn't load</h1>
         <p className="mt-2 text-sm text-muted-foreground">Something went wrong. Try refreshing.</p>
         <button
-          onClick={() => { router.invalidate(); reset(); }}
+          onClick={() => {
+            router.invalidate();
+            reset();
+          }}
           className="mt-6 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
         >
           Try again
@@ -61,35 +70,48 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "DFSA · Premium Dragon Fruit Plants South Africa · Since 2008" },
-      { name: "description", content: "Dragon Fruit South Africa (DFSA) — leading dragon fruit farming since 2008. High-yield plants, cultivars, consultation and worldwide export." },
-      { name: "author", content: "Dragon Fruit South Africa" },
-      { property: "og:title", content: "DFSA · Premium Dragon Fruit Plants South Africa" },
-      { property: "og:description", content: "Wonderful Dragon Fruit · Worldwide Commercial Plant Supply · Since 2008." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" },
-    ],
-    scripts: [
-      { src: "https://www.googletagmanager.com/gtag/js?id=G-MVRRCZ6NFZ", async: true },
-      {
-        children: `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-MVRRCZ6NFZ');`,
-      },
-      {
-        children: `(function(){var h=(typeof location!=='undefined'?location.hostname:'');var id=null;if(h.indexOf('wonderfuldragonfruit.company')!==-1){id='GTM-TDPC8JSV';}else if(h.indexOf('lovable.app')!==-1){id='GTM-TQJXS82R';}if(!id)return;window.dataLayer=window.dataLayer||[];window.dataLayer.push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=document.getElementsByTagName('script')[0],j=document.createElement('script');j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+id;f.parentNode.insertBefore(j,f);var n=document.createElement('noscript');var i=document.createElement('iframe');i.src='https://www.googletagmanager.com/ns.html?id='+id;i.height='0';i.width='0';i.style.display='none';i.style.visibility='hidden';n.appendChild(i);if(document.body){document.body.insertBefore(n,document.body.firstChild);}})();`,
-      },
-    ],
-  }),
+  loader: () => getSiteSeo(),
+  head: ({ loaderData, matches }) => {
+    const origin = loaderData?.origin;
+    const path = matches.at(-1)?.pathname || "/";
+    const privatePage = ["/account", "/admin", "/payment-settings", "/checkout"].some(
+      (prefix) => path === prefix || path.startsWith(`${prefix}/`),
+    );
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { title: "DFSA · Premium Dragon Fruit Plants South Africa · Since 2008" },
+        {
+          name: "description",
+          content:
+            "Dragon Fruit South Africa (DFSA) — leading dragon fruit farming since 2008. High-yield plants, cultivars, consultation and worldwide export.",
+        },
+        { name: "author", content: "Dragon Fruit South Africa" },
+        { property: "og:title", content: "DFSA · Premium Dragon Fruit Plants South Africa" },
+        {
+          property: "og:description",
+          content: "Wonderful Dragon Fruit · Worldwide Commercial Plant Supply · Since 2008.",
+        },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { property: "og:site_name", content: "Wonderful Dragon Fruit Company · DFSA" },
+        ...(origin && !privatePage
+          ? [
+              { property: "og:url", content: `${origin}${path}` },
+              { property: "og:image", content: `${origin}/project-thumbnail.jpg` },
+              { name: "twitter:image", content: `${origin}/project-thumbnail.jpg` },
+            ]
+          : []),
+        ...(privatePage ? [{ name: "robots", content: "noindex, nofollow" }] : []),
+      ],
+      links: [
+        { rel: "stylesheet", href: appCss },
+        { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+        ...(origin && !privatePage ? [{ rel: "canonical", href: `${origin}${path}` }] : []),
+      ],
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -99,7 +121,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <head><HeadContent /></head>
+      <head>
+        <HeadContent />
+      </head>
       <body>
         {children}
         <Scripts />
@@ -115,7 +139,9 @@ function RootComponent() {
       <CartProvider>
         <div className="flex min-h-screen flex-col">
           <Header />
-          <main className="flex-1"><Outlet /></main>
+          <main className="flex-1">
+            <Outlet />
+          </main>
           <Footer />
         </div>
         <CartDrawer />

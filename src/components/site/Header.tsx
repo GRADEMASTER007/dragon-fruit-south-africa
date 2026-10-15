@@ -9,8 +9,10 @@ const links = [
   { to: "/shop", label: "Shop" },
   { to: "/quote", label: "Request Quote" },
   { to: "/services", label: "Services" },
+  { to: "/blog", label: "Blog" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
+  { to: "/account", label: "Account" },
 ];
 
 export function Header() {
@@ -25,11 +27,13 @@ export function Header() {
           </div>
           <div className="leading-tight">
             <div className="font-display text-lg font-semibold">DFSA</div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Since 2008</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Since 2008
+            </div>
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-7 md:flex">
+        <nav className="hidden items-center gap-5 lg:flex">
           {links.map((l) => (
             <Link
               key={l.to}
@@ -70,7 +74,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="lg:hidden"
             onClick={() => setMobile((m) => !m)}
             aria-label="Menu"
           >
@@ -79,7 +83,7 @@ export function Header() {
         </div>
       </div>
       {mobile && (
-        <div className="border-t border-border md:hidden">
+        <div className="border-t border-border lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col px-4 py-2">
             {links.map((l) => (
               <Link

@@ -47,6 +47,19 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const path = new URL(request.url).pathname;
+      if (path === "/robots.txt") {
+        const { robotsDocument } = await import("./server/seo");
+        return await robotsDocument();
+      }
+      if (path === "/mcp" || path.startsWith("/.mcp/")) {
+        const { handleCatalogueMcp } = await import("./server/catalogue-mcp");
+        return await handleCatalogueMcp(request);
+      }
+      if (new URL(request.url).pathname.startsWith("/api/")) {
+        const { handleApi } = await import("./server/api");
+        return await handleApi(request);
+      }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
