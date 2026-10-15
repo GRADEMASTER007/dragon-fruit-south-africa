@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Sprout, Globe2, Award, Truck, CheckCircle2, MapPin, Quote } from "lucide-react";
+import { ArrowRight, Sprout, Globe2, Award, Truck, CheckCircle2, MapPin, Quote, Leaf, BadgeCheck, HeartHandshake } from "lucide-react";
+import { Reveal } from "@/components/site/Reveal";
 import { Button } from "@/components/ui/button";
 import heroImg from "@/assets/african-dragon-fruit-farm-hero.jpg";
 import sweetWhiteAsset from "@/assets/sweet-white-crystal.jpg.asset.json";
